@@ -4,6 +4,8 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('filename',help='Name of the image')
 parser.add_argument('-hlayers',help='Hidden Layers, pass as string with numbers separated by commas')
+parser.add_argument('-epoch',help='Number of epochs to train',type=int)
+parser.add_argument('-savemodel',help='1 to save,default 0',type=int)
 args = parser.parse_args()
 
 
@@ -25,7 +27,9 @@ y_sample = y_train.copy()
 
 '''Define the required parameters'''
 BATCH_SIZE = 1000
-TRAIN_STEPS = 200001
+TRAIN_STEPS = int(4000*y_train.shape[0]/BATCH_SIZE)
+if args.epoch:
+    TRAIN_STEPS = int(args.epoch*y_train.shape[0]/BATCH_SIZE)
 INPUT_SIZE = 2
 OUTPUT_SIZE = 3
 HIDDEN_SIZE = [20,20,20,20,20,20,20]
@@ -83,6 +87,7 @@ print 'Image being painted: {}'.format(filename)
 print 'Press enter to start training:'
 raw_input()
 print 'Starting Training:'
+saver = tf.train.Saver()
 with tf.Session() as sess:
     sess.run(init) #Initialize all the variables(parameters)
     sample_point = 0
@@ -114,5 +119,6 @@ with tf.Session() as sess:
                 sample_filename = 'samples/sample_'+os.path.splitext(filename)[0]+'_epoch'+str(epoch)+'.jpg'
                 print 'Sample stored in:  '+sample_filename
                 cv2.imwrite(sample_filename,image_sample)
-
+    if args.savemodel == 1:
+        saver.save(sess,'models/model_'+os.path.splitext(filename)[0]+'_'+str(img.shape[0])+'x'+str(img.shape[1]),global_step=step)
 
