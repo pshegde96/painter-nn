@@ -6,6 +6,8 @@ parser.add_argument('filename',help='Name of the image')
 parser.add_argument('-hlayers',help='Hidden Layers, pass as string with numbers separated by commas')
 parser.add_argument('-epoch',help='Number of epochs to train',type=int)
 parser.add_argument('-savemodel',help='1 to save,default 0',type=int)
+parser.add_argument('-modeldir',help='Specify dir to store models with / suffixed.Default:models/')
+parser.add_argument('-sampledir',help='Specify dir to store samples with / suffixed.Default:samples/')
 args = parser.parse_args()
 
 
@@ -79,6 +81,14 @@ idx = random.permutation(x_train.shape[0])
 x_train = x_train[idx]
 y_train = y_train[idx]
 
+'''Models and Samples directories '''
+modeldir = 'models/'
+if args.modeldir:
+    modeldir = args.modeldir
+sampledir = 'samples/'
+if args.sampledir:
+    sampledir = args.sampledir
+
 
 ''' Perform Training'''
 print '\n \n \n'
@@ -116,9 +126,9 @@ with tf.Session() as sess:
                 y_sample = sess.run(y_pred,feed_dict={x:x_sample,y_target:y_train})
                 image_sample = y_sample.reshape(img.shape[0],img.shape[1],3).astype(np.uint8)
                 #Store the sample
-                sample_filename = 'samples/sample_'+os.path.splitext(filename)[0]+'_epoch'+str(epoch)+'.jpg'
+                sample_filename = sampledir+'sample_'+os.path.splitext(filename)[0]+'_epoch'+str(epoch)+'.jpg'
                 print 'Sample stored in:  '+sample_filename
                 cv2.imwrite(sample_filename,image_sample)
     if args.savemodel == 1:
-        saver.save(sess,'models/model_'+os.path.splitext(filename)[0]+'_'+str(img.shape[0])+'x'+str(img.shape[1]),global_step=step)
+        saver.save(sess,modeldir+'model_'+os.path.splitext(filename)[0]+'_'+str(img.shape[0])+'x'+str(img.shape[1]),global_step=step)
 
