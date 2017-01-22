@@ -1,11 +1,22 @@
+import argparse
+
+'''Parse command line arguments   '''
+parser = argparse.ArgumentParser()
+parser.add_argument('filename',help='Name of the image')
+parser.add_argument('-hlayers',help='Hidden Layers, pass as string with numbers separated by commas')
+args = parser.parse_args()
+
+
 import cv2
 import tensorflow as tf
 import numpy as np
 import numpy.random as random
 import os
 
+
+
 ''' Load the Image '''
-filename = 'earth.jpg'
+filename = args.filename
 img = cv2.imread(filename)
 img = cv2.resize(img,(225,225))
 y_train = img.reshape(-1,3)
@@ -18,6 +29,8 @@ TRAIN_STEPS = 200001
 INPUT_SIZE = 2
 OUTPUT_SIZE = 3
 HIDDEN_SIZE = [20,20,20,20,20,20,20]
+if args.hlayers:
+    HIDDEN_SIZE = map(int,args.hlayers.split(','))
 
 '''Define the Model'''
 x = tf.placeholder(tf.float32,shape=[None,INPUT_SIZE])
@@ -64,6 +77,11 @@ y_train = y_train[idx]
 
 
 ''' Perform Training'''
+print '\n \n \n'
+print 'The Network Architecture is an FCNET with: {} layers'.format(layers)
+print 'Image being painted: {}'.format(filename)
+print 'Press enter to start training:'
+raw_input()
 print 'Starting Training:'
 with tf.Session() as sess:
     sess.run(init) #Initialize all the variables(parameters)
