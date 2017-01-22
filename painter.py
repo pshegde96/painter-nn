@@ -1,21 +1,23 @@
 import cv2
 import tensorflow as tf
 import numpy as np
+import numpy.random as random
 
 ''' Load the Image '''
-img = cv2.imread('itachi_uchiha.jpg')
-x_train = cv2.resize(img,(400,400))
-cv2.namedWindow('image',cv2.WINDOW_NORMAL)
-cv2.imshow('image',x_train)
-cv2.waitKey(0)
+img = cv2.imread('cat.jpg')
+#y_train = cv2.resize(img,(400,400))
+y_train = img
+#cv2.namedWindow('image',cv2.WINDOW_NORMAL)
+#cv2.imshow('image',y_train)
+#cv2.waitKey(0)
 
 
 '''Define the required parameters'''
-BATCH_SIZE = 10
-TRAIN_STEPS = 10000
+BATCH_SIZE = 1000
+TRAIN_STEPS = 200001
 INPUT_SIZE = 2
 OUTPUT_SIZE = 3
-HIDDEN_SIZE = [20,20,20]
+HIDDEN_SIZE = [20,20,20,20,20,20,20]
 
 '''Define the Model'''
 x = tf.placeholder(tf.float32,shape=[None,INPUT_SIZE])
@@ -45,8 +47,15 @@ y_pred = tf.matmul(z[i],W[i+1]) + b[i+1]
 loss = tf.reduce_mean(tf.nn.l2_loss(y_pred-y_target))
 
 optimizer = tf.train.AdamOptimizer()
+#optimizer = tf.train.MomentumOptimizer(learning_rate=0.01,momentum=0.9)
 train = optimizer.minimize(loss)
 init = tf.initialize_all_variables()
+
+
+''''A vector to draw out samples '''
+x_sample = np.array([[[j,i]for i in range(y_train.shape[0])]for j in range(y_train.shape[1])])
+x_sample = x_sample.reshape(-1,2) #Convert it to a column vector so that it can be fed to the NN
+
 
 
 ''' Perform Training'''
@@ -54,7 +63,25 @@ print 'Starting Training:'
 with tf.Session() as sess:
     sess.run(init) #Initialize all the variables(parameters)
 
-    #for step in range(TRAIN_STEPS):
-        
+    for step in range(TRAIN_STEPS):
+        row_batch = random.choice(y_train.shape[0],size=BATCH_SIZE)
+        col_batch = random.choice(y_train.shape[1],size=BATCH_SIZE)
+        x_batch = np.vstack((row_batch,col_batch)).T 
+        y_batch = y_train[row_batch,col_batch]
+
+        sess.run(train,feed_dict={x:x_batch,y_target:y_batch})
+
+        if step % 50 == 0:
+               losses = sess.run(loss,feed_dict={x:x_batch,y_target:y_batch})
+               print 'Step: {} Loss: {}'.format(step,losses)
+
+        #After every 1000 epochs sample an image
+        if step%5000 == 0:
+            y_sample = sess.run(y_pred,feed_dict={x:x_sample,y_target:y_train.reshape(-1,3)})
+            image_sample = y_sample.reshape(y_train.shape[0],y_train.shape[1],3).astype(np.uint8)
+            #Store the sample
+            cv2.imwrite('samples/sample_epoch'+str(step)+'.jpg',image_sample)
+            #cv2.imshow('sample_image',image_sample)
+            #cv2.waitKey(0)
 
 
