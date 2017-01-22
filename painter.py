@@ -5,11 +5,7 @@ import numpy.random as random
 
 ''' Load the Image '''
 img = cv2.imread('cat.jpg')
-#y_train = cv2.resize(img,(400,400))
-y_train = img
-#cv2.namedWindow('image',cv2.WINDOW_NORMAL)
-#cv2.imshow('image',y_train)
-#cv2.waitKey(0)
+y_train = img.reshape(-1,3)
 
 
 '''Define the required parameters'''
@@ -53,7 +49,7 @@ init = tf.initialize_all_variables()
 
 
 ''''A vector to draw out samples '''
-x_sample = np.array([[[j,i]for i in range(y_train.shape[0])]for j in range(y_train.shape[1])])
+x_sample = np.array([[[j,i]for i in range(img.shape[0])]for j in range(img.shape[1])])
 x_sample = x_sample.reshape(-1,2) #Convert it to a column vector so that it can be fed to the NN
 
 
@@ -64,10 +60,10 @@ with tf.Session() as sess:
     sess.run(init) #Initialize all the variables(parameters)
 
     for step in range(TRAIN_STEPS):
-        row_batch = random.choice(y_train.shape[0],size=BATCH_SIZE)
-        col_batch = random.choice(y_train.shape[1],size=BATCH_SIZE)
+        row_batch = random.choice(img.shape[0],size=BATCH_SIZE)
+        col_batch = random.choice(img.shape[1],size=BATCH_SIZE)
         x_batch = np.vstack((row_batch,col_batch)).T 
-        y_batch = y_train[row_batch,col_batch]
+        y_batch = img[row_batch,col_batch]
 
         sess.run(train,feed_dict={x:x_batch,y_target:y_batch})
 
@@ -77,8 +73,8 @@ with tf.Session() as sess:
 
         #After every 1000 epochs sample an image
         if step%5000 == 0:
-            y_sample = sess.run(y_pred,feed_dict={x:x_sample,y_target:y_train.reshape(-1,3)})
-            image_sample = y_sample.reshape(y_train.shape[0],y_train.shape[1],3).astype(np.uint8)
+            y_sample = sess.run(y_pred,feed_dict={x:x_sample,y_target:y_train})
+            image_sample = y_sample.reshape(img.shape[0],img.shape[1],3).astype(np.uint8)
             #Store the sample
             cv2.imwrite('samples/sample_epoch'+str(step)+'.jpg',image_sample)
             #cv2.imshow('sample_image',image_sample)
