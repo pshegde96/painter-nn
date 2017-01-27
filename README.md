@@ -12,3 +12,9 @@ For additional optional arguments check:
 ```
 python painter.py --help
 ```
+
+####Samples:
+
+![Cat](samples/sample_cat_epoch3900.jpg)
+![Karpathy](sample_karpathy_epoch3100.jpg)
+![Earth](sample_earth_epoch3900.jpg)
