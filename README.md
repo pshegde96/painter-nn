@@ -16,5 +16,5 @@ python painter.py --help
 ####Samples:
 
 ![Cat](samples/sample_cat_epoch3900.jpg)
-![Karpathy](sample_karpathy_epoch3100.jpg)
-![Earth](sample_earth_epoch3900.jpg)
+![Karpathy](samples/sample_karpathy_epoch3100.jpg)
+![Earth](samples/sample_earth_epoch3900.jpg)
